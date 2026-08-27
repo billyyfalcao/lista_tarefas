@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text(
           "Lista de Tarefas",
@@ -43,6 +44,11 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 255, 0, 0),
+
+
+        
+      
       ),
 
       body: Padding(
@@ -54,12 +60,20 @@ class _HomePageState extends State<HomePage> {
                 Expanded (
                   child:TextField(
                     decoration: InputDecoration(
-                      hintText: "Digite uma tarefa",
+                      hintText: "Digite uma tarefa...",
+                      hintStyle: TextStyle(color: Color.fromARGB(255, 255, 255, 255),),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0)
                       )
                     ),
-                  ),)
+                  ),),
+                  SizedBox(height:16.0), //etender como padronizar o botão com a barra
+                  ElevatedButton(
+                    onPressed: (){
+
+                    },
+                    child: Text("Adicionar"),
+                  )
               ],
             )
           ],
