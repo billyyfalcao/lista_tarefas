@@ -10,7 +10,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'lista de tarefas',
+      title: 'Lista de tarefas',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -45,10 +45,6 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 255, 0, 0),
-
-
-        
-      
       ),
 
       body: Padding(
@@ -57,28 +53,50 @@ class _HomePageState extends State<HomePage> {
           children: [
             Row(
               children: [
-                Expanded (
-                  child:TextField(
+                Expanded(
+                  child: TextField(
                     decoration: InputDecoration(
                       hintText: "Digite uma tarefa...",
-                      hintStyle: TextStyle(color: Color.fromARGB(255, 255, 255, 255),),
+                      hintStyle: const TextStyle(
+                        color: Colors.white,
+                      ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0)
-                      )
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
                     ),
-                  ),),
-                  SizedBox(height:16.0), //etender como padronizar o botão com a barra
-                  ElevatedButton(
-                    onPressed: (){
+                  ),
+                ),
 
-                    },
-                    child: Text("Adicionar"),
-                  )
+                const SizedBox(width: 8.0),
+
+                ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('Adicionar'),
+                ),
               ],
-            )
-          ],
-        ),),
+            ),
 
+            const SizedBox(height: 12.0),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return Card(
+                    child: ListTile(
+                      title: Text('Tarefa ${index + 1}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
