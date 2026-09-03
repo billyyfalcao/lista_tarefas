@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 void main() {
   runApp(const MainApp());
@@ -30,6 +31,39 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List <String> tarefas= []; 
+
+  final TextEditingController tarefaController = TextEditingController();
+  
+  void AdicionaTarefa (){
+    if (tarefaController.text.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content:Text("Tarefa vazia, insira uma tarefa antes de adicionar!"))
+      );
+
+      return;
+    }
+
+
+    setState ((){
+      tarefas.add(tarefaController.text);
+    }
+  );
+
+
+    tarefaController.clear();
+
+  } 
+
+  void RemoverTarefa (int index) {
+    setState(() {
+      tarefas.removeAt(index);
+    });
+
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +89,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: tarefaController,
                     decoration: InputDecoration(
                       hintText: "Digite uma tarefa...",
                       hintStyle: const TextStyle(
@@ -70,7 +105,9 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(width: 8.0),
 
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    AdicionaTarefa();
+                  },
                   child: const Text('Adicionar'),
                 ),
               ],
@@ -80,14 +117,16 @@ class _HomePageState extends State<HomePage> {
 
             Expanded(
               child: ListView.builder(
-                itemCount: 10,
+                itemCount: tarefas.length,
                 itemBuilder: (context, index) {
                   return Card(
                     child: ListTile(
-                      title: Text('Tarefa ${index + 1}'),
+                      title: Text(tarefas [index]),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete),
-                        onPressed: () {},
+                        onPressed: () {
+                          RemoverTarefa(index);
+                        },
                       ),
                     ),
                   );
