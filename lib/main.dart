@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'segunda_pagina.dart';
 
 void main() {
   runApp(const MainApp());
@@ -31,43 +31,62 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List <String> tarefas= []; 
+  List<String> tarefas = [];
 
   final TextEditingController tarefaController = TextEditingController();
-  
-  void AdicionaTarefa (){
-    if (tarefaController.text.isEmpty){
+
+  int? indiceEditando;
+
+  void AdicionaTarefa() {
+    if (tarefaController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content:Text("Tarefa vazia, insira uma tarefa antes de adicionar!"))
+        const SnackBar(
+          content: Text(
+            "Tarefa vazia, insira uma tarefa antes de adicionar!",
+          ),
+        ),
       );
 
       return;
     }
 
-
-    setState ((){
-      tarefas.add(tarefaController.text);
-    }
-  );
-
-
-    tarefaController.clear();
-
-  } 
-
-  void RemoverTarefa (int index) {
     setState(() {
-      tarefas.removeAt(index);
+      if (indiceEditando == null) {
+        tarefas.add(tarefaController.text);
+      } else {
+        tarefas[indiceEditando!] = tarefaController.text;
+        indiceEditando = null;
+      }
     });
 
-
+    tarefaController.clear();
   }
 
+  void RemoverTarefa(int index) {
+    setState(() {
+      tarefas.removeAt(index);
+
+      if (indiceEditando == index) {
+        indiceEditando = null;
+        tarefaController.clear();
+      } else if (indiceEditando != null && indiceEditando! > index) {
+        indiceEditando = indiceEditando! - 1;
+      }
+    });
+  }
+
+  void editarTarefa(int index) {
+    setState(() {
+      indiceEditando = index;
+      tarefaController.text = tarefas[index];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+
       appBar: AppBar(
         title: const Text(
           "Lista de Tarefas",
@@ -121,13 +140,48 @@ class _HomePageState extends State<HomePage> {
                 itemBuilder: (context, index) {
                   return Card(
                     child: ListTile(
-                      title: Text(tarefas [index]),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          RemoverTarefa(index);
-                        },
+                      title: Text(tarefas[index]),
+
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              editarTarefa(index);
+                            },
+                          ),
+
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              RemoverTarefa(index);
+                            },
+                          ),
+                        ],
                       ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 12.0),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Ir para outra página'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SegundaPagina(),
                     ),
                   );
                 },
