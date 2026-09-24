@@ -1,7 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
 import 'segunda_pagina.dart';
+import 'database/database_helper.dart';
 
 void main() {
+  if (Platform.isWindows) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+
   runApp(const MainApp());
 }
 
@@ -31,56 +41,50 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<String> tarefas = [];
+  List<Map<String, dynamic>> tarefas = [];
 
   final TextEditingController tarefaController = TextEditingController();
 
   int? indiceEditando;
 
-  void AdicionaTarefa() {
+  @override
+  void initState() {
+    super.initState();
+    _carregarTarefas();
+  }
+
+  Future<void> _carregarTarefas() async {
+    final dados = await DatabaseHelper.instance.listarTarefas();
+
+    setState(() {
+      tarefas = dados;
+    });
+  }
+
+  Future<void> adicionaTarefa() async {
     if (tarefaController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Tarefa vazia, insira uma tarefa antes de adicionar!",
-          ),
-        ),
-      );
 
       return;
     }
 
-    setState(() {
-      if (indiceEditando == null) {
-        tarefas.add(tarefaController.text);
-      } else {
-        tarefas[indiceEditando!] = tarefaController.text;
-        indiceEditando = null;
-      }
-    });
+      await DatabaseHelper.instance.inserirTarefa(tarefaController.text);
+      tarefaController.clear();
 
-    tarefaController.clear();
+      _carregarTarefas();
   }
 
-  void RemoverTarefa(int index) {
-    setState(() {
-      tarefas.removeAt(index);
-
-      if (indiceEditando == index) {
-        indiceEditando = null;
-        tarefaController.clear();
-      } else if (indiceEditando != null && indiceEditando! > index) {
-        indiceEditando = indiceEditando! - 1;
-      }
-    });
+  Future<void> removerTarefa(int index) async {
+    
+    await DatabaseHelper.instance.removerTarefa(index);
+    _carregarTarefas();
   }
 
-  void editarTarefa(int index) {
-    setState(() {
-      indiceEditando = index;
-      tarefaController.text = tarefas[index];
-    });
-  }
+//  void editarTarefa(int index) {
+//    setState(() {
+//      indiceEditando = index;
+//      tarefaController.text = tarefas[index];
+//    });
+//  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +106,7 @@ class _HomePageState extends State<HomePage> {
 
       body: Padding(
         padding: const EdgeInsets.all(16.0),
+
         child: Column(
           children: [
             Row(
@@ -118,15 +123,16 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
                 ),
 
                 const SizedBox(width: 8.0),
 
                 ElevatedButton(
-                  onPressed: () {
-                    AdicionaTarefa();
-                  },
+                  onPressed: adicionaTarefa,
                   child: const Text('Adicionar'),
                 ),
               ],
@@ -137,25 +143,31 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: ListView.builder(
                 itemCount: tarefas.length,
+
                 itemBuilder: (context, index) {
                   return Card(
                     child: ListTile(
-                      title: Text(tarefas[index]),
+                      title: Text(
+                        tarefas[index]['descricao'],
+                      ),
 
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
+
                         children: [
                           IconButton(
                             icon: const Icon(Icons.edit),
+
                             onPressed: () {
-                              editarTarefa(index);
+                              //editarTarefa(index);
                             },
                           ),
 
                           IconButton(
                             icon: const Icon(Icons.delete),
+
                             onPressed: () {
-                              RemoverTarefa(index);
+                              removerTarefa(tarefas[index]['id']);
                             },
                           ),
                         ],
@@ -170,13 +182,19 @@ class _HomePageState extends State<HomePage> {
 
             SizedBox(
               width: double.infinity,
+
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
+
                 icon: const Icon(Icons.arrow_forward),
-                label: const Text('Ir para outra página'),
+
+                label: const Text(
+                  'Ir para outra página',
+                ),
+
                 onPressed: () {
                   Navigator.push(
                     context,
